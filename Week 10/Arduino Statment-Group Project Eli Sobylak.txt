@@ -1,0 +1,146 @@
+Arduino Statement:
+
+For our group project we decided a chess board would be both feasible and a really cool homage to the text we read for seminar, which featured a automata called the Mechanical Turk that ‘learned’ how to play chess, and amazed people world wide. 
+
+Besides the chess board itself, we wanted to incorporate an arduino component to collaborativly work on our computer science skills. We decided its main feature should be to act as the timer-clock for the people who are playing the game, to make it more competitive and ensure that people did not take all day to make a move. To accomplish this, we created an arduino script that used to buttons and 12 LEDs. Each player would hit their button to start the other players clock. We sewed 12 LEDs into a cardboard box to hold the electronics. The button would start the timer which would be displayed on these LEDs and count down from 64 in binary and display the number on the LEDs. In addition, we made it so that if both players press their buttons, the game is over and the lights would do a little show for both players. 
+
+On the day of the showing, we were unable to get the timing feature to work on our timer. Although unsure, we thought that the wiring was to blame for this problem. So for most of the show we just had it performing the game over light show. 
+
+Here is the code that was used for this project;
+chessTime.ino: Written by Eli, Noah, Zack S., and Zak Y.
+
+int buttonP1 = 13;
+int buttonP2 = 12;
+int ledP1[] = {0,1,2,3,4,5};
+int ledP2[] = {6,7,8,9,10,11};
+
+void setup() {
+  pinMode(buttonP1, INPUT);
+  pinMode(buttonP2, INPUT);
+  
+  int index;
+  for(index = 0; index <= 5; index++) {
+    pinMode(ledP1[index], OUTPUT);
+    pinMode(ledP2[index], OUTPUT);
+  }
+  Serial.begin(9600);
+}
+
+void loop() {
+//startGame();
+//buttonTest();
+gameOver();
+}
+
+void startGame() {
+  int pinStateP1 = digitalRead(buttonP1);
+  int pinStateP2 = digitalRead(buttonP2);
+  
+  if(pinStateP1 == 1) {
+    countdownP1();
+  }
+}
+
+void countdownP1() {
+ int pinStateP1 = digitalRead(buttonP1);
+ int pinStateP2 = digitalRead(buttonP2);
+ 
+ if(pinStateP1 == 0) {
+ int index; 
+ for(index = 0; index <64; index++) {
+   int a= index % 2;          // calculate LSB   
+   int b= index/2 % 2;     
+   int c= index/4 % 2;        
+   int d= index/8 % 2;  
+   int e= index/16 % 2;
+   int f= index/32 % 2;       //claculate MSB
+   digitalWrite(ledP1[0],f);  //write MSB
+   digitalWrite(ledP1[1],e);
+   digitalWrite(ledP1[2],d);   
+   digitalWrite(ledP1[3],c);   
+   digitalWrite(ledP1[4],b);    
+   digitalWrite(ledP1[5],a);  // write LSB 
+   delay(500);
+  }
+ }
+  if(pinStateP1 == 1) {
+    countdownP2();
+  }
+  if(pinStateP1 && pinStateP2 == 1) {
+    gameOver();
+  }
+}
+
+void countdownP2() {
+ int pinStateP1 = digitalRead(buttonP1);
+ int pinStateP2 = digitalRead(buttonP2);
+ 
+ 
+ if(pinStateP2 == 0) {
+ int index; 
+ for(index = 0; index <64; index++) {
+   int a= index % 2;          // calculate LSB   
+   int b= index/2 % 2;     
+   int c= index/4 % 2;        
+   int d= index/8 % 2;  
+   int e= index/16 % 2;
+   int f= index/32 % 2;       //claculate MSB
+   digitalWrite(ledP2[0],f);  //write MSB
+   digitalWrite(ledP2[1],e);
+   digitalWrite(ledP2[2],d);   
+   digitalWrite(ledP2[3],c);   
+   digitalWrite(ledP2[4],b);    
+   digitalWrite(ledP2[5],a);  // write LSB 
+   delay(500);
+  }
+ }
+  if(pinStateP2 == 1) {
+    countdownP1();
+  }
+  if(pinStateP1 && pinStateP2 == 1) {
+    gameOver();
+  }
+}
+
+void gameOver() {
+  int index;
+  int delayTime = 55; 
+  delay(delayTime);
+
+  for(index = 0; index <= 5; index++)
+    { 
+      digitalWrite(ledP1[index], HIGH); 
+      digitalWrite(ledP2[index], HIGH);
+      delay(delayTime);                    
+      digitalWrite(ledP1[index], LOW);
+      digitalWrite(ledP2[index], LOW);   
+    }
+    for(index = 5; index >= 0; index--)
+    {
+      digitalWrite(ledP1[index], HIGH);
+      digitalWrite(ledP2[index], HIGH);  
+      delay(delayTime);                    
+      digitalWrite(ledP1[index], LOW); 
+      digitalWrite(ledP2[index], LOW);  
+    }
+}
+
+
+void buttonTest() {
+  int pinStateP1 = digitalRead(buttonP1);
+  int pinStateP2 = digitalRead(buttonP2);
+  
+  //Serial.print(char('Button for P1'));
+  Serial.println(pinStateP1);
+  //Serial.print(char('Button for P2'));
+  Serial.println(pinStateP2);
+  
+  if(pinStateP1 && pinStateP2 == 1) {
+    digitalWrite(ledP2[3], HIGH);
+  }
+  else {
+    digitalWrite(ledP2[3], LOW); 
+  }
+  
+  delay(200);
+}

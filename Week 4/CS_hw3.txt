@@ -1,0 +1,56 @@
+HW 3
+Eli Sobylak
+21-apr-2015
+
+for the arduino assignment this week where we had to make four legs blink randomly for a random time interval I implemented the following code;
+
+
+//initialize variable ledPins as an array for easy random access later 
+int ledPins[] = {8,9,10,11,12,13};
+
+void setup() {
+  //create a variable that will represent the position in the array of leds. 
+  int index;
+  //use a for loop to iterate over the array
+  for(index = 0; index <= 6; index++)
+  {
+    //and set each led pin [0-5] as output
+    pinMode(ledPins[index],OUTPUT);
+  }
+}
+
+void loop() {
+  //calls function randomLED()
+  randomLED();
+
+}
+
+void randomLED()
+{
+//create variable to represent position in led array
+int index;
+//create variable to represent the delay time for modularity
+int delayTime;
+
+//set the value of variable index to a random number between 0 and 6
+index = random(7);
+//set the delayTime variable to a random number between 100 and 1000 milliseconds 
+delayTime = random(100,1000);
+
+//set the ledPin with the set random index to be on
+digitalWrite(ledPins[index], HIGH);
+//delay appropriate amount 
+delay(delayTime);
+//then turn off that led
+digitalWrite(ledPins[index], LOW);
+}
+
+
+If you want to see the constant changes we are making to the python weaving program Noah and I are working on you can check out the gitHub over here; 
+https://github.com/thebareju/MachineWeaving
+
+
+
+
+
+

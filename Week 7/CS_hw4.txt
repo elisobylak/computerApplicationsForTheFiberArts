@@ -1,0 +1,144 @@
+Eli Sobylak
+11-May-2015
+CS HW-4
+
+For the processing and arduino assignment, I had to heavily google how exactly you get arduino and processing to communicate to each other and this is what I came up with;
+
+Processing Code:
+import processing.serial.*;
+
+// Global variables
+int new_sX, old_sX;
+int new_sY, old_sY;
+int nX, nY;
+Serial myPort;
+
+// Setup the Processing Canvas
+void setup(){
+  //x,y
+  size( 800, 400 );
+  strokeWeight( 5 );
+ 
+  //Open the serial port for communication with the Arduino
+  //Make sure the COM port is correct
+  myPort = new Serial(this, "/dev/cu.usbmodemfd131", 9600);
+  myPort.bufferUntil('\n');
+}
+
+
+// Draw the Window on the computer screen
+void draw(){
+  
+  // Fill canvas grey
+  background( 100 );
+    
+  // Set the stroke colour to white
+  stroke(255); 
+  
+  // Draw a circle at the mouse location
+  ellipse( nX, nY, 10, 10 );
+
+  //Draw Line from the top of the page to the bottom of the page
+  //in line with the mouse.
+  line(nX,0,nX,height);  
+  line(0,nY,width,nY);
+}
+
+
+// Get the new mouse location and send it to the arduino
+void mouseMoved(){
+  nX = mouseX;
+  nY = mouseY; 
+  
+  println(myPort);
+  
+  //map the mouse x coordinates to the LEDs on the Arduino.
+  new_sX=(int)map(nX,0,800,0,10);
+  new_sY=(int)map(nY,400,0,11,21);
+
+  if(new_sY==old_sY){
+    //do nothing
+  } else {  
+    old_sY = new_sY;
+    myPort.write(""+new_sY);
+  }
+  
+  while(myPort.available() > 0){
+    int inByte = myPort.read();
+    println(inByte);
+  }
+}
+
+
+And here is the Arduino Code:
+void setup() {                
+  // initialize the digital pins as an output.
+  pinMode(6, OUTPUT);
+// Turn the Serial Protocol ON
+  Serial.begin(9600);
+}
+
+void loop() {
+  mouseY();
+  //mouseX();
+}
+
+void mouseX(){
+   byte byteRead;
+   int new_i;
+
+   /*  check if data has been sent from the computer: */
+  if (Serial.available()) {
+  
+    /* read the most recent byte */
+    byteRead = Serial.read();
+    //You have to subtract '0' from the read Byte to convert from text to a number.
+    byteRead=byteRead-'0';
+    
+    //Turn off all LEDS
+    for(int i=2; i<11; i++){
+      digitalWrite(i, LOW);
+    }
+    
+    for(int i = 0; i<(byteRead+1); i++){
+      if(byteRead >= 11){
+        new_i =(int)map(i,0,10,1,255);
+        digitalWrite(6,HIGH);
+        delay(new_i);
+        digitalWrite(6,LOW);
+      }else if(byteRead <= 10)
+      {
+        new_i =(int)map(i,0,10,1,255);
+        analogWrite(6,new_i);
+      }
+      
+    }     
+  }
+}
+
+
+void mouseY(){
+   byte byteRead;
+   int new_i;
+
+   /*  check if data has been sent from the computer: */
+  if (Serial.available()) {
+  
+    /* read the most recent byte */
+    byteRead = Serial.read();
+    //You have to subtract '0' from the read Byte to convert from text to a number.
+    byteRead=byteRead-'0';
+    
+    //Turn off all LEDS
+    for(int i=2; i<11; i++){
+      digitalWrite(i, LOW);
+    }
+    
+    for(int i = 0; i<(byteRead+1); i++){
+      //if(byteRead == i){
+        new_i =(int)map(i,0,10,1,255);
+        analogWrite(6,new_i);
+      //}
+    }     
+  }
+}
